@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vietnam Points of Interest Finder</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-indigo-900 mb-2">
+                🗺️ Vietnam Points of Interest Finder
+            </h1>
+            <p class="text-gray-600">Discover amazing places across Vietnam</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <label for="locationInput" class="block text-sm font-medium text-gray-700 mb-2">
+                        Enter a location in Vietnam
+                    </label>
+                    <input 
+                        type="text" 
+                        id="locationInput" 
+                        placeholder="e.g., Hanoi, Ho Chi Minh City, Da Nang..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                    />
+                </div>
+                <div class="flex items-end">
+                    <button 
+                        id="searchBtn"
+                        class="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-200 shadow-md hover:shadow-lg"
+                    >
+                        🔍 Search
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Loading indicator -->
+            <div id="loadingIndicator" class="hidden mt-4 text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <p class="text-gray-600 mt-2">Searching for points of interest...</p>
+            </div>
+            
+            <!-- Error message -->
+            <div id="errorMessage" class="hidden mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            </div>
+        </div>
+
+        <!-- Map Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📍 Map View</h2>
+            <div id="map"></div>
+        </div>
+
+        <!-- Points of Interest List -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🎯 Points of Interest</h2>
+            <div id="poiList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <p class="text-gray-500 col-span-full text-center py-8">
+                    Enter a location to discover points of interest
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Main Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
