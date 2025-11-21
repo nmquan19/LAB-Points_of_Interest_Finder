@@ -17,9 +17,14 @@ const searchBtn = document.getElementById('searchBtn');
 const loadingIndicator = document.getElementById('loadingIndicator');
 const errorMessage = document.getElementById('errorMessage');
 const poiList = document.getElementById('poiList');
+const weatherSection = document.getElementById('weatherSection')
+const weatherLoading = document.getElementById('weatherLoading');
+const weatherContent = document.getElementById('weatherContent');
+const weatherError = document.getElementById('weatherError');
 
 // API base URL
 const API_BASE_URL = 'http://localhost:3000/api';
+const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
 // Function to show loading
 function showLoading(show) {
@@ -152,6 +157,86 @@ function displayPOIsList(pois) {
     }).join('');
 }
 
+// Function to fetch weather data
+async function fetchWeatherData(lat, lon, locationName) {
+    if (!config || !config.WEATHER_API_KEY || config.WEATHER_API_KEY === 'YOUR_WEATHER_API_KEY_HERE') {
+        console.error('Weather API key not configured');
+        showWeatherError('Weather API key not configured. Please add your API key to config.js')
+        return;
+    }
+
+    // Show weather section and loading state
+    weatherSection.classList.remove('hidden')
+    weatherLoading.classList.remove('hidden')
+    weatherContent.classList.add('hidden')
+    weatherError.classList.add('hidden');
+
+    try {
+        const url = `${WEATHER_API_URL}?lat=${lat}&lon=${lon}&appid=${config.WEATHER_API_KEY}&units=metric`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error('Weather data not available');
+        }
+
+        const weatherData = await response.json();
+        displayWeatherInfo(weatherData, locationName);
+
+    } catch (error) {
+        console.error('Error fetching weather:', error);
+        showWeatherError('Unable to load weather data, please try again')
+    } finally {
+        weatherLoading.classList.add('hidden');
+    }
+}
+
+function displayWeatherInfo(data, locationName) {
+    weatherContent.classList.remove('hidden');
+    weatherError.classList.add('hidden')
+
+    // Update location and date
+    document.getElementById('weatherLocation').textContent = locationName || data.name;
+    const currentDate = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    document.getElementById('weatherDate').textContent = currentDate;
+
+    // Update temparature
+    document.getElementById('weatherTemp').textContent = Math.round(data.main.temp);
+    document.getElementById('weatherFeelsLike').textContent = 
+        `Feel like: ${Math.round(data.main.feels_like)}°C`;
+    
+    // Update weather description
+    const description = data.weather[0].description;
+    document.getElementById('weatherDescription').textContent = 
+        description.charAt(0).toUpperCase() + description.slice(1);
+
+    // Update weather icon
+    const iconCode = data.weather[0].icon;
+    document.getElementById('weatherIcon').src = 
+        `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+    document.getElementById('weatherIcon').alt = description;
+
+    // Update detailed info
+    document.getElementById('weatherHumidity').textContent = `${data.main.humidity}%`;
+    document.getElementById('weatherWind').textContent = `${data.wind.speed} m/s`;
+    document.getElementById('weatherPressure').textContent = `${data.main.pressure} hPa`;
+
+    // Visibility (convert from meters to kilometers)
+    const visibilityKm = (data.visibility / 1000).toFixed(1);
+    document.getElementById('weatherVisibility').textContent = `${visibilityKm} km`;
+}
+
+function showWeatherError(message) {
+    weatherContent.classList.add('hidden');
+    weatherLoading.classList.add('hidden');
+    weatherError.classList.remove('hidden');
+    weatherError.querySelector('p').textContent = message;
+}
+
 // Function to search for location and POIs
 async function searchLocation() {
     const location = locationInput.value.trim();
@@ -186,6 +271,9 @@ async function searchLocation() {
         // Display results
         displayPOIsOnMap(poisData.pois, locationData.lat, locationData.lon);
         displayPOIsList(poisData.pois);
+
+        // Fetch and display weather data
+        fetchWeatherData(locationData.lat, locationData.lon, locationData.name || location);
 
     } catch (error) {
         console.error('Error:', error);

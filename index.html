@@ -70,6 +70,73 @@
             <div id="map"></div>
         </div>
 
+        <!-- Weather Section -->
+        <div id="weatherSection" class="bg-white rounded-lg shadow-lg p-6 mb-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4"> ☀️ Weather infomation </h2>
+
+            <!-- Weather Loading-->
+            <div id="weatherLoading" class="text-center py-3"> 
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <p class="text-gray-600 mt-2">Loading weather data...</p>
+            </div>
+
+             <!-- Weather Content -->
+            <div id="weatherContent" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left side: Main weather info -->
+                    <div class="bg-gradient-to-br from-blue-400 to-indigo-600 text-white rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 id="weatherLocation" class="text-2xl font-bold">-</h3>
+                                <p id="weatherDate" class="text-sm opacity-90">-</p>
+                            </div>
+                            <img id="weatherIcon" src="" alt="Weather icon" class="w-20 h-20">
+                        </div>
+                        
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="text-6xl font-bold" id="weatherTemp">-</div>
+                            <div class="text-2xl">°C</div>
+                        </div>
+                        
+                        <p id="weatherDescription" class="text-xl capitalize">-</p>
+                        <p id="weatherFeelsLike" class="text-sm opacity-90 mt-2">Feels like: -°C</p>
+                    </div>
+                    
+                    <!-- Right side: Detailed info -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="text-3xl mb-2">💧</div>
+                            <p class="text-sm text-gray-600">Humidity</p>
+                            <p id="weatherHumidity" class="text-2xl font-bold text-indigo-600">-%</p>
+                        </div>
+                        
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="text-3xl mb-2">🌬️</div>
+                            <p class="text-sm text-gray-600">Wind Speed</p>
+                            <p id="weatherWind" class="text-2xl font-bold text-indigo-600">- m/s</p>
+                        </div>
+                        
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="text-3xl mb-2">🌡️</div>
+                            <p class="text-sm text-gray-600">Pressure</p>
+                            <p id="weatherPressure" class="text-2xl font-bold text-indigo-600">- hPa</p>
+                        </div>
+                        
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <div class="text-3xl mb-2">👁️</div>
+                            <p class="text-sm text-gray-600">Visibility</p>
+                            <p id="weatherVisibility" class="text-2xl font-bold text-indigo-600">- km</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Weather Error -->
+            <div id="weatherError" class="hidden p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                <p>Unable to load weather data. Please try again.</p>
+            </div>
+        </div>
+
         <!-- Points of Interest List -->
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">🎯 Points of Interest</h2>
@@ -84,6 +151,9 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
+    <!-- API Keys-->
+    <script src="config.js"></script>
+
     <!-- Main Application Script -->
     <script src="app.js"></script>
 </body>
