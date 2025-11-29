@@ -17,14 +17,28 @@ const searchBtn = document.getElementById('searchBtn');
 const loadingIndicator = document.getElementById('loadingIndicator');
 const errorMessage = document.getElementById('errorMessage');
 const poiList = document.getElementById('poiList');
+
 const weatherSection = document.getElementById('weatherSection')
 const weatherLoading = document.getElementById('weatherLoading');
 const weatherContent = document.getElementById('weatherContent');
 const weatherError = document.getElementById('weatherError');
 
+const translateInput = document.getElementById('translateInput');
+const translateOutput = document.getElementById('translateOutput');
+const targetLanguage = document.getElementById('targetLanguage');
+const translateBtn = document.getElementById('translateBtn');
+const clearTranslateBtn = document.getElementById('clearTranslateBtn');
+const copyTranslateBtn = document.getElementById('copyTranslateBtn');
+const translationLoading = document.getElementById('translationLoading');
+const translationError = document.getElementById('translationError');
+const detectedLang = document.getElementById('detectedLang');
+const autoTranslatePOI = document.getElementById('autoTranslatePOI');
+
 // API base URL
 const API_BASE_URL = 'http://localhost:3000/api';
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
+const TRANSLATE_API_URL = 'https://libretranslate.de/translate';
+const TRANSLATE_DETECT_URL = 'https://libretranslate.de/detect';
 
 // Function to show loading
 function showLoading(show) {
@@ -283,6 +297,174 @@ async function searchLocation() {
     }
 }
 
+// Store original POI data
+let originalPOIs = [];
+let isTranslated = false;
+
+// Function to detect language
+async function detectLanguage(text) {
+    try {
+        const response = await fetch(TRANSLATE_DETECT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({q: text})
+        });
+
+        if (!response.ok) throw new Error("Detection failed");
+
+        const data = await response.json();
+        if (data && data.length > 0) {
+            const langCode = data[0].language;
+            const confidence = (data[0].confidence * 100).toFixed(0);
+            return {langCode, confidence};
+        }
+        return null;
+    } catch (error) {
+        console.error('Language detection error:', error);
+        return null;
+    }
+}
+
+// Function to translate text
+async function translateText(text, targetLang, sourceLang = 'auto') {
+    try {
+        const response = await fetch(TRANSLATE_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                q: text,
+                source: sourceLang,
+                target: targetLang,
+                format: 'text'
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Translation failed');
+        }
+
+        const data = await response.json();
+        return data.translatedText;
+    } catch (error) {
+        console.error('Translation error:', error);
+        throw error;
+    }
+}
+
+// Function to show translation loading
+async function showTranslationLoading(show) {
+    translationLoading.classList.toggle('hidden', !show);
+}
+
+// Function to show translation error
+async function showTranslationError(message) {
+    translationError.textContent = message;
+    translationError.classList.remove('hidden');
+    setTimeout(()=>{
+        translationError.classList.add("hidden")
+    }, 5000);
+}
+
+// Main translate button handler
+async function handleTranslate() {
+    const textToTranslate = translateInput.value.trim();
+    const targetLang = targetLanguage.value;
+
+    if (!textToTranslate) {
+        showTranslationError('Please enter text to translate');
+        return;
+    }
+
+    showTranslationLoading(true);
+    translationError.classList.add('hidden');
+    translateBtn.disabled = true;
+
+    try {
+        const translatedText = await translateText(textToTranslate, targetLang);
+
+        translateOutput.innerHTML = translatedText;
+        copyTranslateBtn.classList.remove('hidden');
+    } catch (error) {
+        showTranslationError(`${error}`);
+        translateOutput.innerHTML = '<span class="text-gray-400">Translation failed... </span>';
+    } finally {
+        showTranslationLoading(false);
+        translateBtn.disabled = false;
+    }
+}
+
+// Auto-detect language when user types
+let detectTimeout;
+translateInput.addEventListener('input', () => {
+    clearTimeout(detectTimeout);
+    const text = translateInput.value.trim();
+
+    if (text.length > 0) {
+        detectTimeout = setTimeout(async() =>{
+            const detected = await detectLanguage(text);
+            if (detected) {
+                const langNames = {
+                    'en': 'English',
+                    'vi': 'Vietnamese',
+                    'zh': 'Chinese',
+                    'ja': 'Japanese',
+                    'ko': 'Korean',
+                    'fr': 'French',
+                    'de': 'German',
+                    'es': 'Spanish',
+                    'it': 'Italian',
+                    'pt': 'Portuguese',
+                    'ru': 'Russian',
+                    'th': 'Thai',
+                    'ar': 'Arabic'
+                };
+                const langName = langNames[detected.langCode] || detected.langCode;
+                detectedLang.textContent = `Detected: ${langName} (${detected.confidence}% confidence)`;
+            }
+        }, 500);
+    } else {
+        detectedLang.textContent = '';
+    }
+});
+
+// Clear translation
+clearTranslateBtn.addEventListener('click', () => {
+    translateInput.value = '';
+    translateOutput.innerHTML = '<span class="text-gray-400">Translation will appear here...</span>';
+    detectedLang.textContent = '';
+    copyTranslateBtn.classList.add('hidden');
+});
+
+// Copy translation
+copyTranslateBtn.addEventListener('click', () => {
+    const text = translateOutput.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = copyTranslateBtn.textContent;
+        copyTranslateBtn.textContent = '✓ Copied!';
+        setTimeout(()=>{
+            copyTranslateBtn.textContent = originalText;
+        }, 2000);
+    });
+});
+
+// Translate button click
+translateBtn.addEventListener('click', handleTranslate);
+
+// Enter key to translate
+translateInput.addEventListener('keypress', (e) => {
+    if (e.key == 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleTranslate();
+    }
+});
+
 // Event listeners
 searchBtn.addEventListener('click', searchLocation);
 
@@ -295,3 +477,5 @@ locationInput.addEventListener('keypress', (e) => {
 // Initial message
 console.log('Vietnam POI Finder loaded successfully!');
 console.log('Enter a location in Vietnam to start exploring...');
+
+
