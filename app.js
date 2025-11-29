@@ -28,7 +28,7 @@ const translateOutput = document.getElementById('translateOutput');
 const targetLanguage = document.getElementById('targetLanguage');
 const translateBtn = document.getElementById('translateBtn');
 const clearTranslateBtn = document.getElementById('clearTranslateBtn');
-const copyTranslateBtn = document.getElementById('copyTranslateBtn');
+const copyTranslationBtn = document.getElementById('copyTranslationBtn');
 const translationLoading = document.getElementById('translationLoading');
 const translationError = document.getElementById('translationError');
 const detectedLang = document.getElementById('detectedLang');
@@ -37,8 +37,7 @@ const autoTranslatePOI = document.getElementById('autoTranslatePOI');
 // API base URL
 const API_BASE_URL = 'http://localhost:3000/api';
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/weather';
-const TRANSLATE_API_URL = 'https://libretranslate.de/translate';
-const TRANSLATE_DETECT_URL = 'https://libretranslate.de/detect';
+const TRANSLATE_API_URL = 'https://api.mymemory.translated.net/get';
 
 // Function to show loading
 function showLoading(show) {
@@ -331,27 +330,23 @@ async function detectLanguage(text) {
 // Function to translate text
 async function translateText(text, targetLang, sourceLang = 'auto') {
     try {
-        const response = await fetch(TRANSLATE_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                q: text,
-                source: sourceLang,
-                target: targetLang,
-                format: 'text'
-            })
-        });
+        // MyMemory API format: ? q=text&langpair=source|target
+        const langPair = sourceLang === 'auto' ? `en|${targetLang}` : `${sourceLang}|${targetLang}`;
+        const url = `${TRANSLATE_API_URL}?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+        
+        const response = await fetch(url);
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Translation failed');
+            throw new Error('Translation failed');
         }
 
         const data = await response.json();
-        return data.translatedText;
+        
+        if (data.responseStatus === 200) {
+            return data.responseData.translatedText;
+        } else {
+            throw new Error(data.responseDetails || 'Translation failed');
+        }
     } catch (error) {
         console.error('Translation error:', error);
         throw error;
@@ -390,7 +385,7 @@ async function handleTranslate() {
         const translatedText = await translateText(textToTranslate, targetLang);
 
         translateOutput.innerHTML = translatedText;
-        copyTranslateBtn.classList.remove('hidden');
+        copyTranslationBtn.classList.remove('hidden');
     } catch (error) {
         showTranslationError(`${error}`);
         translateOutput.innerHTML = '<span class="text-gray-400">Translation failed... </span>';
@@ -400,56 +395,22 @@ async function handleTranslate() {
     }
 }
 
-// Auto-detect language when user types
-let detectTimeout;
-translateInput.addEventListener('input', () => {
-    clearTimeout(detectTimeout);
-    const text = translateInput.value.trim();
-
-    if (text.length > 0) {
-        detectTimeout = setTimeout(async() =>{
-            const detected = await detectLanguage(text);
-            if (detected) {
-                const langNames = {
-                    'en': 'English',
-                    'vi': 'Vietnamese',
-                    'zh': 'Chinese',
-                    'ja': 'Japanese',
-                    'ko': 'Korean',
-                    'fr': 'French',
-                    'de': 'German',
-                    'es': 'Spanish',
-                    'it': 'Italian',
-                    'pt': 'Portuguese',
-                    'ru': 'Russian',
-                    'th': 'Thai',
-                    'ar': 'Arabic'
-                };
-                const langName = langNames[detected.langCode] || detected.langCode;
-                detectedLang.textContent = `Detected: ${langName} (${detected.confidence}% confidence)`;
-            }
-        }, 500);
-    } else {
-        detectedLang.textContent = '';
-    }
-});
-
 // Clear translation
 clearTranslateBtn.addEventListener('click', () => {
     translateInput.value = '';
     translateOutput.innerHTML = '<span class="text-gray-400">Translation will appear here...</span>';
     detectedLang.textContent = '';
-    copyTranslateBtn.classList.add('hidden');
+    copyTranslationBtn.classList.add('hidden');
 });
 
 // Copy translation
-copyTranslateBtn.addEventListener('click', () => {
+copyTranslationBtn.addEventListener('click', () => {
     const text = translateOutput.textContent;
-    navigator.clipboard.writeText(text).then(() => {
-        const originalText = copyTranslateBtn.textContent;
-        copyTranslateBtn.textContent = '✓ Copied!';
+    navigator.clipboard.writeText(text). then(() => {
+        const originalText = copyTranslationBtn. textContent;
+        copyTranslationBtn.textContent = '✓ Copied!';
         setTimeout(()=>{
-            copyTranslateBtn.textContent = originalText;
+            copyTranslationBtn.textContent = originalText;
         }, 2000);
     });
 });
