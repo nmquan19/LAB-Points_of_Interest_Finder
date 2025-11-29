@@ -296,10 +296,6 @@ async function searchLocation() {
     }
 }
 
-// Store original POI data
-let originalPOIs = [];
-let isTranslated = false;
-
 // Function to translate text
 async function translateText(text, targetLang, sourceLang = 'auto') {
     try {
@@ -314,7 +310,6 @@ async function translateText(text, targetLang, sourceLang = 'auto') {
         }
 
         const data = await response.json();
-        console.log('Translation response:', data); //debug
         
         if (data.responseStatus === 200) {
             return data.responseData.translatedText;

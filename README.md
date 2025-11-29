@@ -1,13 +1,14 @@
 # Vietnam Points of Interest Finder
 
-A web application that allows users to search for locations in Vietnam and displays 5 points of interest on an interactive map using OpenStreetMap API, along with real-time weather information.
+A web application that allows users to search for locations in Vietnam and displays points of interest on an interactive map using OpenStreetMap API, along with real-time weather information and language translation features.
 
 ## Features
 
 - 🔍 Search for any location in Vietnam
 - 🗺️ Interactive map display using Leaflet.js and OpenStreetMap
-- 📍 Shows 5 points of interest near the searched location
+- 📍 Shows points of interest near the searched location
 - ☀️ Real-time weather information using OpenWeatherMap API
+- 🌐 Text translation feature using MyMemory Translation API
 - 🎨 Beautiful UI with Tailwind CSS
 - 📱 Responsive design for mobile and desktop
 
@@ -27,6 +28,7 @@ A web application that allows users to search for locations in Vietnam and displ
 - **OpenStreetMap Nominatim API**: Location geocoding
 - **Overpass API**: Points of interest data
 - **OpenWeatherMap API**: Real-time weather information
+- **MyMemory Translation API**: Text translation service
 
 ## Installation
 
@@ -65,12 +67,22 @@ http://localhost:3000
 
 ## Usage
 
+### Location Search
 1. Enter a location name in Vietnam (e.g., "Hanoi", "Ho Chi Minh City", "Da Nang")
 2. Click the "Search" button or press Enter
-3. View the location and 5 points of interest on the map
+3. View the location and points of interest on the map
 4. Check the real-time weather information for the selected location
 5. Click on markers to see more details about each location
 6. Scroll down to see a detailed list of all points of interest with icons and coordinates
+
+### Translation Feature
+1. Navigate to the "Translate" section
+2. Enter the text you want to translate in the input box
+3. Select your target language from the dropdown menu
+4. Click "Translate" button or press Enter
+5. View the translated text in the output area
+6. Click "Copy" to copy the translation to clipboard
+7. Click "Clear" to reset and start a new translation
 
 ## API Endpoints
 
@@ -118,7 +130,7 @@ Get points of interest near a location.
 
 ```
 ├── index.html          # Main HTML file
-├── app.js              # Frontend JavaScript (map & weather)
+├── app.js              # Frontend JavaScript (map, weather & translation)
 ├── config.js           # Configuration (Weather API key)
 ├── server.js           # Express server with API endpoints
 ├── package.json        # Dependencies and scripts
@@ -137,14 +149,40 @@ The application displays comprehensive weather data including:
 
 Weather data is automatically fetched when you search for a location.
 
+## Translation Feature
+
+The translation tool supports multiple languages:
+- **English** (en)
+- **Vietnamese** (vi)
+- **Chinese** (zh)
+- **Japanese** (ja)
+- **Korean** (ko)
+- **French** (fr)
+- **German** (de)
+- **Spanish** (es)
+- **Italian** (it)
+- **Portuguese** (pt)
+- **Russian** (ru)
+- **Thai** (th)
+- **Arabic** (ar)
+
+Features:
+- Instant translation using MyMemory API
+- Copy translated text to clipboard
+- Clear button to reset translation
+- Enter key support for quick translation
+- User-friendly error messages
+
 ## Notes
 
 - The application uses OpenStreetMap's free APIs with rate limiting
 - Weather data requires an OpenWeatherMap API key (configured in `config.js`)
+- Translation uses MyMemory API (free tier with usage limits)
 - Please be respectful of API usage limits
 - Results may vary based on available data in OpenStreetMap
 - The application is configured to search specifically within Vietnam
 - Weather information updates with each location search
+- Translation quality depends on MyMemory API database
 
 ## Dependencies
 
@@ -160,8 +198,11 @@ Weather data is automatically fetched when you search for a location.
 - Add directions between points
 - Weather forecast (multi-day predictions)
 - Export POI list
-- Multi-language support
-- Historical weather data
+- Auto-translate POI names and descriptions
+- Language detection for translation input
+- Translation history
+- Offline translation support
+- Voice input for translation
 
 ## License
 
