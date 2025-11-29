@@ -300,33 +300,6 @@ async function searchLocation() {
 let originalPOIs = [];
 let isTranslated = false;
 
-// Function to detect language
-async function detectLanguage(text) {
-    try {
-        const response = await fetch(TRANSLATE_DETECT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({q: text})
-        });
-
-        if (!response.ok) throw new Error("Detection failed");
-
-        const data = await response.json();
-        if (data && data.length > 0) {
-            const langCode = data[0].language;
-            const confidence = (data[0].confidence * 100).toFixed(0);
-            return {langCode, confidence};
-        }
-        return null;
-    } catch (error) {
-        console.error('Language detection error:', error);
-        return null;
-    }
-}
-
 // Function to translate text
 async function translateText(text, targetLang, sourceLang = 'auto') {
     try {
@@ -341,6 +314,7 @@ async function translateText(text, targetLang, sourceLang = 'auto') {
         }
 
         const data = await response.json();
+        console.log('Translation response:', data); //debug
         
         if (data.responseStatus === 200) {
             return data.responseData.translatedText;
@@ -395,6 +369,19 @@ async function handleTranslate() {
     }
 }
 
+// Show typing indicator
+let detectTimeout;
+translateInput.addEventListener('input', () => {
+    clearTimeout(detectTimeout);
+    const text = translateInput.value.trim();
+
+    if (text. length > 0) {
+        detectedLang.textContent = 'Ready to translate... ';
+    } else {
+        detectedLang.textContent = '';
+    }
+});
+
 // Clear translation
 clearTranslateBtn.addEventListener('click', () => {
     translateInput.value = '';
@@ -420,7 +407,7 @@ translateBtn.addEventListener('click', handleTranslate);
 
 // Enter key to translate
 translateInput.addEventListener('keypress', (e) => {
-    if (e.key == 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleTranslate();
     }
